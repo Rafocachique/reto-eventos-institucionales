@@ -3,3 +3,7 @@ node_modules
 .env
 
 /generated/prisma
+
+# Ignorar las imagenes de prueba pero mantener la carpeta
+public/uploads/*
+!public/uploads/.gitkeep

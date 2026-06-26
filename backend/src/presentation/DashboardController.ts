@@ -25,7 +25,7 @@ export class DashboardController {
   public aprobar = async (req: Request, res: Response): Promise<any> => {
     try {
       const { id } = req.params;
-      const inscripcion = await this.service.aprobarInscripcion(id);
+      const inscripcion = await this.service.aprobarInscripcion(id as string);
       return res.json({ mensaje: 'Inscripción aprobada exitosamente y cupo descontado.', inscripcion });
     } catch (error: any) {
       return res.status(400).json({ error: error.message });
@@ -36,7 +36,7 @@ export class DashboardController {
     try {
       const { id } = req.params;
       const { motivo } = req.body;
-      const inscripcion = await this.service.rechazarInscripcion(id, motivo);
+      const inscripcion = await this.service.rechazarInscripcion(id as string, motivo);
       return res.json({ mensaje: 'Inscripción rechazada.', inscripcion });
     } catch (error: any) {
       return res.status(400).json({ error: error.message });

@@ -6,11 +6,15 @@ export class InscripcionController {
 
   public registrar = async (req: Request, res: Response): Promise<any> => {
     try {
-      const { dni, nombre, urlImagenDniMenor } = req.body;
+      const { dni, nombre } = req.body;
+      const file = req.file;
 
-      if (!dni || !nombre || !urlImagenDniMenor) {
-        return res.status(400).json({ error: 'Faltan datos obligatorios (dni, nombre, urlImagenDniMenor)' });
+      if (!dni || !nombre || !file) {
+        return res.status(400).json({ error: 'Faltan datos obligatorios (dni, nombre, imagen)' });
       }
+
+      // Construir la URL pública apuntando a nuestra carpeta estática servida por Express
+      const urlImagenDniMenor = `http://localhost:3000/uploads/${file.filename}`;
 
       const inscripcion = await this.service.crearInscripcion(dni, nombre, urlImagenDniMenor);
       

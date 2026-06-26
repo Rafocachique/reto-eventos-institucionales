@@ -40,15 +40,20 @@ export class InscripcionService {
     }
 
     // Guardar en la base de datos a través de Prisma
-    const nuevaInscripcion = await prisma.inscripcion.create({
-      data: {
-        dniColegiado: dni,
-        nombre: nombre,
-        urlImagenDniMenor: urlImagenDniMenor
-        // estado: 'PENDIENTE' es automático por el default del schema
+    try {
+      const nuevaInscripcion = await prisma.inscripcion.create({
+        data: {
+          dniColegiado: dni,
+          nombre: nombre,
+          urlImagenDniMenor: urlImagenDniMenor
+        }
+      });
+      return nuevaInscripcion;
+    } catch (error: any) {
+      if (error.code === 'P2002') {
+        throw new Error('Este DNI ya se encuentra registrado en el sistema.');
       }
-    });
-
-    return nuevaInscripcion;
+      throw error;
+    }
   }
 }

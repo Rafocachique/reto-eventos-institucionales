@@ -48,10 +48,17 @@ export class DashboardService {
       if (inscripcion.estado === 'APROBADO') throw new Error('La inscripción ya fue aprobada.');
 
       // 3. Aprobar si hay cupo
-      return tx.inscripcion.update({
+      const inscripcionActualizada = await tx.inscripcion.update({
         where: { id },
         data: { estado: 'APROBADO' }
       });
+
+      // Requerimiento: disparar invitación (simulada mediante un log en el sistema)
+      console.log(`\n📨 [SISTEMA DE CORREOS] Enviando invitación oficial al evento...`);
+      console.log(`   Destinatario: ${inscripcionActualizada.nombre} (DNI: ${inscripcionActualizada.dniColegiado})`);
+      console.log(`   Mensaje: ¡Su inscripción ha sido APROBADA! Lo esperamos en el evento.\n`);
+
+      return inscripcionActualizada;
     }, {
       isolationLevel: 'Serializable' // Garantía 100% contra concurrencia extrema
     });
@@ -65,12 +72,20 @@ export class DashboardService {
       throw new Error('Debe proporcionar un motivo de rechazo (ej. "DNI ilegible").');
     }
 
-    return prisma.inscripcion.update({
+    const inscripcionRechazada = await prisma.inscripcion.update({
       where: { id },
       data: { 
         estado: 'RECHAZADO', 
         observacionRechazo: motivo 
       }
     });
+
+    // Requerimiento: disparar alerta al usuario con el motivo del rechazo
+    console.log(`\n⚠️ [SISTEMA DE CORREOS] Enviando notificación de rechazo...`);
+    console.log(`   Destinatario: ${inscripcionRechazada.nombre} (DNI: ${inscripcionRechazada.dniColegiado})`);
+    console.log(`   Motivo: ${motivo}`);
+    console.log(`   Mensaje: Por favor, subsane la observación y vuelva a registrarse.\n`);
+
+    return inscripcionRechazada;
   }
 }
