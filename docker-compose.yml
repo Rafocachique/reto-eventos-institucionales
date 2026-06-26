@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  # Base de Datos Transaccional (PostgreSQL)
+  db:
+    image: postgres:15-alpine
+    container_name: eventos-db
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password123
+      POSTGRES_DB: eventos_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # API Externa Mock (Colegiados)
+  mock-api:
+    image: clue/json-server
+    container_name: eventos-mock-api
+    restart: always
+    ports:
+      - "3004:80"
+    volumes:
+      - ./mock-api/colegiados.json:/data/db.json
+    # Se añade un delay de 500ms para simular latencia de red real
+    command: --delay 500
+
+volumes:
+  db_data:
