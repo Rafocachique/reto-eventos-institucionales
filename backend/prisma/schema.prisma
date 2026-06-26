@@ -1,0 +1,24 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+}
+
+enum EstadoInscripcion {
+  PENDIENTE
+  APROBADO
+  RECHAZADO
+}
+
+model Inscripcion {
+  id                   String            @id @default(uuid())
+  dniColegiado         String            @unique
+  nombre               String
+  urlImagenDniMenor    String            // Simulación de la carga de imagen
+  estado               EstadoInscripcion @default(PENDIENTE)
+  observacionRechazo   String?           // Obligatorio si se rechaza
+  createdAt            DateTime          @default(now())
+  updatedAt            DateTime          @updatedAt
+}
