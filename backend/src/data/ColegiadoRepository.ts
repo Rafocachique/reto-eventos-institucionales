@@ -3,10 +3,9 @@ import axios from 'axios';
 export interface ColegiadoMock {
   dni: string;
   nombre: string;
-  apellido: string;
-  estado: string; // "Habilitado" o "Inhabilitado"
-  sede: string;
-  esAdministrativo: boolean;
+  habilitado: boolean;
+  es_administrativo: boolean;
+  consejo_departamental: string;
 }
 
 export class ColegiadoRepository {
@@ -20,13 +19,12 @@ export class ColegiadoRepository {
    */
   async getColegiadoByDni(dni: string): Promise<ColegiadoMock | null> {
     try {
-      const response = await axios.get<ColegiadoMock[]>(`${this.apiUrl}?dni=${dni}`);
+      // Descargamos todo el padrón y lo filtramos en código para evitar problemas de versiones de json-server
+      const response = await axios.get<ColegiadoMock[]>(`${this.apiUrl}`);
+      const colegiados = response.data;
+      const colegiado = colegiados.find(c => c.dni === dni);
       
-      // json-server devuelve un array cuando filtramos por query param
-      if (response.data && response.data.length > 0) {
-        return response.data[0];
-      }
-      return null;
+      return colegiado || null;
     } catch (error) {
       console.error(`[ColegiadoRepository] Error consultando DNI ${dni}:`, error);
       return null;

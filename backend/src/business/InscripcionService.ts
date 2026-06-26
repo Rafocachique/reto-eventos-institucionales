@@ -1,7 +1,13 @@
+import 'dotenv/config';
 import { ColegiadoRepository } from '../data/ColegiadoRepository';
 import { PrismaClient } from '@prisma/client';
+import { Pool } from 'pg';
+import { PrismaPg } from '@prisma/adapter-pg';
 
-const prisma = new PrismaClient();
+const connectionString = `${process.env.DATABASE_URL}`;
+const pool = new Pool({ connectionString });
+const adapter = new PrismaPg(pool);
+const prisma = new PrismaClient({ adapter });
 
 export class InscripcionService {
   private colegiadoRepo = new ColegiadoRepository();
@@ -16,15 +22,15 @@ export class InscripcionService {
       return { esElegible: false, motivo: 'DNI no encontrado en el padrón.' };
     }
 
-    if (colegiado.estado !== 'Habilitado') {
+    if (colegiado.habilitado !== true) {
       return { esElegible: false, motivo: 'El colegiado no se encuentra Habilitado.' };
     }
 
-    if (colegiado.sede !== 'Lima') {
+    if (colegiado.consejo_departamental !== 'Lima') {
       return { esElegible: false, motivo: 'El evento es exclusivo para la sede Lima.' };
     }
 
-    if (colegiado.esAdministrativo) {
+    if (colegiado.es_administrativo) {
       return { esElegible: false, motivo: 'El personal administrativo no puede participar.' };
     }
 
