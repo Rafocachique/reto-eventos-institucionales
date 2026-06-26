@@ -32,5 +32,35 @@ services:
     # Se añade un delay de 500ms para simular latencia de red real
     command: --delay 500
 
+  # Servidor Backend (Node.js + Prisma)
+  backend:
+    build: ./backend
+    container_name: eventos-backend
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      - DATABASE_URL=postgresql://postgres:password123@db:5432/eventos_db?schema=public
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ./backend/src:/app/src
+      - ./backend/public:/app/public
+      - ./backend/prisma:/app/prisma
+
+  # Servidor Frontend (React + Vite)
+  frontend:
+    build: ./frontend
+    container_name: eventos-frontend
+    restart: always
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend
+    volumes:
+      - ./frontend/src:/app/src
+      - ./frontend/public:/app/public
+
 volumes:
   db_data:
