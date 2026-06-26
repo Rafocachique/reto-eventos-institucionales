@@ -1,4 +1,7 @@
 import { ColegiadoRepository } from '../data/ColegiadoRepository';
+import { PrismaClient } from '@prisma/client';
+
+const prisma = new PrismaClient();
 
 export class InscripcionService {
   private colegiadoRepo = new ColegiadoRepository();
@@ -26,5 +29,28 @@ export class InscripcionService {
     }
 
     return { esElegible: true, colegiado };
+  }
+
+  /**
+   * Registra una nueva inscripción si cumple todas las reglas
+   */
+  async crearInscripcion(dni: string, nombre: string, urlImagenDniMenor: string) {
+    const validacion = await this.validarElegibilidad(dni);
+    
+    if (!validacion.esElegible) {
+      throw new Error(validacion.motivo); // Rechazado por reglas de negocio
+    }
+
+    // Guardar en la base de datos a través de Prisma
+    const nuevaInscripcion = await prisma.inscripcion.create({
+      data: {
+        dniColegiado: dni,
+        nombre: nombre,
+        urlImagenDniMenor: urlImagenDniMenor
+        // estado: 'PENDIENTE' es automático por el default del schema
+      }
+    });
+
+    return nuevaInscripcion;
   }
 }
